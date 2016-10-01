@@ -1,0 +1,62 @@
+package com.cyntaks.chip8;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+/**
+    The LoopingByteInputStream is a ByteArrayInputStream that
+    loops indefinitly. The looping stops when the close() method
+    is called.
+*/
+public class LoopingByteArrayInputStream extends ByteArrayInputStream {
+
+    private boolean closed;
+
+    /**
+        Creates a new LoopingByteInputStream with the specified
+        byte array. The array is not copied.
+    */
+    public LoopingByteArrayInputStream(byte[] buffer) {
+        super(buffer);
+        closed = false;
+    }
+
+
+    /**
+        Reads <code>length</code> bytes from the array. If the
+        end of the array is reached, the reading starts over from
+        the beginning of the array. Returns -1 if the array has
+        been closed.
+    */
+    public int read(byte[] buffer, int offset, int length) {
+        if (closed) {
+            return -1;
+        }
+        int totalBytesRead = 0;
+
+        while (totalBytesRead < length) {
+            int numBytesRead = super.read(buffer,
+                offset + totalBytesRead,
+                length - totalBytesRead);
+
+            if (numBytesRead > 0) {
+                totalBytesRead += numBytesRead;
+            }
+            else {
+                reset();
+            }
+        }
+        return totalBytesRead;
+    }
+
+
+    /**
+        Closes the stream. Future calls to the read() methods
+        will return 1.
+    */
+    public void close() throws IOException {
+        super.close();
+        closed = true;
+    }
+
+}
